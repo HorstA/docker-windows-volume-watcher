@@ -24,13 +24,26 @@ def docker_bind_to_windows_path(path):
         str:  Converts Hyper-V mount path to Windows path (e.g. /C/some-path -> C:/some-path).
 
     """
+    # expr = re.compile('^(?:/host_mnt)?/([a-zA-Z])/(.*)$')
+    # match = re.match(expr, path)
+    # if not match:
+    #     return None
+    # return '%s:\\%s' % match.groups()
+    # fix from issue: Doesn't Work for WSL2 #18
     expr = re.compile('^(?:/host_mnt)?/([a-zA-Z])/(.*)$')
+    expr2 = re.compile('^([A-Za-z]):\\\\(.*)$')
+    
     match = re.match(expr, path)
+    match2 = re.match(expr2, path)
+    
     if not match:
-        return None
-    return '%s:\\%s' % match.groups()
-
-
+        if not match2:
+            return None
+        else:
+            return '%s:\\%s' % match2.groups()
+    else:
+        return '%s:\\%s' % match.groups()`
+    
 class ContainerMonitor(object):
     """
     Monitors container start/stop events and creates notifiers for mounts matching patterns.
